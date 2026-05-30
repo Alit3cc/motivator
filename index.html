@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Daily Motivator</title>
+  <meta name="description" content="A pocket-sized shot of motivation." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Motivator" />
+  <meta name="theme-color" content="#6c63ff" id="metaTheme" />
+  <link id="appleTouchIcon" rel="apple-touch-icon" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #f0efff;
+      --surface:  #ffffff;
+      --primary:  #6c63ff;
+      --pdim:     rgba(108,99,255,.14);
+      --text:     #12111f;
+      --muted:    #7875a0;
+      --bshadow:  rgba(108,99,255,.38);
+      --cshadow:  rgba(108,99,255,.11);
+      --divider:  rgba(108,99,255,.13);
+    }
+    [data-theme="dark"] {
+      --bg:       #0c0b18;
+      --surface:  #17162a;
+      --primary:  #8b84ff;
+      --pdim:     rgba(139,132,255,.16);
+      --text:     #f0efff;
+      --muted:    #9d9bc2;
+      --bshadow:  rgba(139,132,255,.42);
+      --cshadow:  rgba(0,0,0,.55);
+      --divider:  rgba(255,255,255,.07);
+    }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      transition: background .3s, color .3s;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      height: 100dvh;
+      padding:
+        max(env(safe-area-inset-top,0px), 14px)
+        max(env(safe-area-inset-right,0px), 22px)
+        max(env(safe-area-inset-bottom,0px), 22px)
+        max(env(safe-area-inset-left,0px), 22px);
+      max-width: 540px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0 14px;
+      border-bottom: 1px solid var(--divider);
+      flex-shrink: 0;
+    }
+    .logo {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+    .bolt { color: var(--primary); }
+
+    #themeBtn {
+      background: var(--pdim);
+      border: none;
+      border-radius: 50%;
+      width: 42px; height: 42px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .3s, transform .14s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #themeBtn:active { transform: scale(.87); }
+
+    /* ── MAIN ───────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      padding: 22px 0;
+      min-height: 0;
+    }
+
+    /* ── CARD ───────────────────────────────────── */
+    #card {
+      background: var(--surface);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 14px 52px var(--cshadow);
+      transition: background .3s, box-shadow .3s;
+    }
+
+    #bar {
+      height: 8px;
+      background: linear-gradient(90deg, #6c63ff, #a78bfa);
+      transition: background .55s ease;
+    }
+
+    .body {
+      padding: 28px 26px 26px;
+    }
+
+    #emoji {
+      font-size: 2.5rem;
+      line-height: 1;
+      display: block;
+      user-select: none;
+      margin-bottom: 14px;
+    }
+    #emoji.pop { animation: epop .38s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes epop {
+      0%  { transform: scale(.55) rotate(-12deg); }
+      60% { transform: scale(1.22) rotate(5deg); }
+      100%{ transform: scale(1) rotate(0); }
+    }
+
+    #quote {
+      font-size: clamp(1.05rem, 4.3vw, 1.38rem);
+      font-weight: 600;
+      line-height: 1.56;
+      letter-spacing: -.015em;
+      color: var(--text);
+      min-height: 3.5em;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    #counter {
+      margin-top: 20px;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0;
+      transition: opacity .35s ease;
+    }
+    #counter.on { opacity: 1; }
+
+    /* quote transitions */
+    .out { opacity: 0 !important; transform: translateY(-7px) !important; }
+    .in  { animation: qin .3s ease both; }
+    @keyframes qin {
+      from { opacity: 0; transform: translateY(11px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── FOOTER ─────────────────────────────────── */
+    footer {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+    }
+
+    #btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      padding: 18px 0;
+      width: 100%;
+      font-size: 1.02rem;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: .025em;
+      cursor: pointer;
+      box-shadow: 0 8px 30px var(--bshadow);
+      transition: background .3s, box-shadow .3s, transform .12s, opacity .2s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    [data-theme="dark"] #btn { color: #0c0b18; }
+    #btn:active       { transform: scale(.965); }
+    #btn.busy         { opacity: .62; pointer-events: none; }
+
+    .hint {
+      font-size: .74rem;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    /* ── LANDSCAPE COMPACT ──────────────────────── */
+    @media (orientation: landscape) and (max-height: 480px) {
+      .body    { padding: 16px 22px 16px; }
+      #emoji   { font-size: 1.9rem; margin-bottom: 10px; }
+      #quote   { font-size: clamp(.9rem, 2.6vh, 1.1rem); min-height: 2em; }
+      #counter { margin-top: 12px; }
+      #btn     { padding: 14px 0; }
+      header   { padding: 5px 0 10px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <span class="logo"><span class="bolt">⚡</span> Motivator</span>
+    <button id="themeBtn" aria-label="Switch to dark mode">🌙</button>
+  </header>
+
+  <main>
+    <div id="card">
+      <div id="bar"></div>
+      <div class="body">
+        <span id="emoji">💫</span>
+        <p id="quote"></p>
+        <div id="counter"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <button id="btn">✨ &nbsp;Inspire Me</button>
+    <p class="hint">Tap for a new spark · swipe up too</p>
+  </footer>
+
+</div>
+<script>
+'use strict';
+
+// ── QUOTES ───────────────────────────────────────────────────────────────────
+/** @type {readonly string[]} */
+const Q = Object.freeze([
+  // Action & Getting Started
+  "The secret of getting ahead is getting started.",
+  "You don't have to be great to start, but you have to start to be great.",
+  "Stop waiting for the perfect moment. Take the moment and make it perfect.",
+  "One day or day one — you decide.",
+  "The best time to plant a tree was 20 years ago. The second best time is now.",
+  "Done is better than perfect.",
+  "Motion beats meditation every single time.",
+  "Action is the antidote to anxiety.",
+  "You can't steer a parked car.",
+  "Make a move. Any move. Just move.",
+  "Ideas without execution are just daydreams.",
+  "Start before you're ready. Seriously.",
+  "Progress over perfection — always.",
+  "The first step is the hardest. Take it anyway.",
+  "Your future self is watching you right now.",
+  "Twenty seconds of insane courage can change everything.",
+  "Do something today your future self will thank you for.",
+  "Show up. That's already 80% of success.",
+  "If not you, who? If not now, when?",
+  "Momentum builds on momentum. Start small. Keep going.",
+  "Start somewhere. Anywhere. Just not nowhere.",
+  "Less talk. More action. Same you — better results.",
+  // Persistence & Resilience
+  "Fall seven times, stand up eight.",
+  "It always seems impossible until it's done.",
+  "The road to success is always under construction.",
+  "Persist through the pain. Grow through the struggle.",
+  "Champions aren't born. They're built — one rep at a time.",
+  "The comeback is always stronger than the setback.",
+  "Every expert was once a disaster.",
+  "What feels like the end is often the beginning in disguise.",
+  "You're closer than you think. Don't stop now.",
+  "The grind is where greatness is forged.",
+  "Tough times never last. Tough people do.",
+  "You've survived 100% of your hardest days so far.",
+  "Keep going. The best is still ahead.",
+  "Every no is just a detour, not a dead end.",
+  "A river cuts through rock not because of its power, but its persistence.",
+  "Endurance is the crowning quality of greatness.",
+  "The only failure is giving up.",
+  "Small steps forward still move the needle.",
+  "You didn't come this far to only come this far.",
+  "Success is just failure that hasn't quit yet.",
+  "The grind never goes out of style.",
+  "You are not stuck. You are just mid-transformation.",
+  // Growth & Learning
+  "Every master was once a disaster.",
+  "Growth lives just outside your comfort zone.",
+  "The person who makes no mistakes makes nothing.",
+  "Mistakes are proof you're trying.",
+  "You are always a student, never a master.",
+  "Embrace the struggle — it's sculpting you.",
+  "Level up. Every single day.",
+  "Be a little better than yesterday. That's enough.",
+  "The discomfort you feel is just growth in disguise.",
+  "Every skill starts as something you couldn't do yet.",
+  "Your brain rewires every time you learn something new.",
+  "Curiosity is a superpower. Stay curious.",
+  "Invest in yourself. The returns are limitless.",
+  "Reading one page a day beats reading zero pages.",
+  "Your potential is not a fixed thing. It grows with every attempt.",
+  // Self-Belief & Confidence
+  "Believe you can and you're halfway there.",
+  "The only person who can stop you is you.",
+  "You are more capable than you realize.",
+  "Your potential has no ceiling. Stop putting one there.",
+  "The voice that says you can't is lying.",
+  "Back yourself. Nobody else will do it for you.",
+  "You are built for exactly this moment.",
+  "Stop shrinking to fit spaces that don't fit you.",
+  "Your self-doubt is not a fact — it's just noise.",
+  "Be the person you needed when you were younger.",
+  "You are not what happened to you. You are what you choose to become.",
+  "Confidence is just trust in yourself. Trust yourself.",
+  "There's a version of you that already has everything you want. Become them.",
+  "You belong in every room you walk into.",
+  "The world needs your specific kind of magic. Don't hide it.",
+  "Speak kindly to yourself. You're listening.",
+  "Your story isn't over. Not even close.",
+  "You are exactly where you need to be — and also capable of more.",
+  "Own your worth. No apologies.",
+  "You are enough. And then some.",
+  "Be relentlessly, unapologetically yourself.",
+  "You have survived every single bad day so far. Today is no different.",
+  // Success & Hard Work
+  "Success is a series of small wins stacked up.",
+  "Discipline is freedom in disguise.",
+  "Every big achievement started with one small decision.",
+  "Hard work beats talent when talent doesn't work hard.",
+  "Excellence is not a destination — it's a daily practice.",
+  "Success doesn't come to you. You go to it.",
+  "Work in silence. Let success make the noise.",
+  "The difference between ordinary and extraordinary is that little extra.",
+  "Success is rented, not owned. The rent is due every day.",
+  "Your habits are your future, on repeat.",
+  "Results require receipts — put in the work.",
+  "Pressure makes diamonds. You're getting there.",
+  "Outwork your doubts.",
+  "The only shortcut to success is consistency.",
+  // Mindset & Attitude
+  "Change your thoughts and you change your world.",
+  "A positive mind finds opportunity in difficulty.",
+  "Your attitude determines your direction.",
+  "Energy flows where attention goes.",
+  "Choose your hard. Easy now, hard later. Hard now, easy later.",
+  "Gratitude turns what we have into enough.",
+  "Your vibe is contagious. Make it worth catching.",
+  "Shift your perspective and the whole world shifts with you.",
+  "Complaining doesn't change things. Action does.",
+  "Focus on what you can control. Let go of the rest.",
+  "The mind is the battlefield and you're the general.",
+  "You can't pour from an empty cup. Fill yours first.",
+  "Comparison is the thief of joy and the killer of progress.",
+  "How you do anything is how you do everything.",
+  "Your morning routine is a vote for the person you want to become.",
+  "Feed your focus. Starve your fear.",
+  "Good vibes are a choice. Make it every morning.",
+  "Think big. Start small. Act now.",
+  "What you tolerate, you perpetuate.",
+  "Make yourself proud today.",
+  "Make it happen. The universe is ready when you are.",
+  // Dreams & Vision
+  "Dream big enough to scare yourself a little.",
+  "Your imagination is the blueprint for your future.",
+  "The biggest risk is not taking any risk at all.",
+  "Vision without action is a daydream. Action without vision is a nightmare.",
+  "Build the life you can't stop thinking about.",
+  "Some people dream of success. Others wake up and work for it.",
+  "Your goals don't care about your excuses.",
+  "Write down your dreams. Then do something about them today.",
+  "Dare to be ridiculously ambitious.",
+  "You have to see it before you can be it.",
+  "Don't just wish for it. Work for it.",
+  "Goals are dreams with a deadline and a plan.",
+  "Aim for the moon. Even if you miss, you'll land among stars.",
+  "Believe in your vision even when no one else does yet.",
+  // Daily Habits & Consistency
+  "Small consistent actions beat occasional heroics.",
+  "You are what you repeatedly do.",
+  "The compound effect is slow but unstoppable.",
+  "One good decision today. One more tomorrow.",
+  "Show up, especially when you don't feel like it.",
+  "Consistency is the ultimate competitive advantage.",
+  "Don't break the chain.",
+  "Your daily habits are writing your autobiography.",
+  "Win the morning and you win the day.",
+  "1% better every day is 37x better by year's end.",
+  "Routine is not boring. Routine is freedom.",
+  "Do the thing. Then do it again. Then again.",
+  "Make today's effort tomorrow's foundation.",
+  "Tiny daily actions build mighty lives.",
+  "Discipline over motivation — every single time.",
+  "Today is practice for the rest of your life. Practice well.",
+  // Courage & Fear
+  "Feel the fear and do it anyway.",
+  "Courage is not the absence of fear — it's acting despite it.",
+  "The risk of trying is nothing compared to the regret of not.",
+  "What would you do if you knew you couldn't fail?",
+  "Say yes first. Figure it out second.",
+  "Leap and the net will appear.",
+  "Every brave thing starts with one terrifying step.",
+  "Fear is just excitement without the breath.",
+  "Regret is heavier than failure. Choose to try.",
+  "The greatest adventure is the one you haven't taken yet.",
+  "Life begins at the end of your comfort zone.",
+  "Be afraid and do it anyway. That's real courage.",
+  "Doubt kills more dreams than failure ever will.",
+  "The thing you keep putting off? Do that today.",
+  "Stop playing it safe. Safe is slow. Safe is boring.",
+  // Energy & Spark
+  "Your only competition is who you were yesterday.",
+  "Be so good they can't ignore you.",
+  "You didn't wake up to be mediocre.",
+  "Plot twist: you're the main character.",
+  "Every sunrise is a new chance. Take it.",
+  "You are a work in progress — and that's the best version there is.",
+  "Life is short. Ship the thing.",
+  "The only way out is through.",
+  "Breathe in possibility. Breathe out doubt.",
+  "The version of you that succeeds is just the current you who didn't quit.",
+]);
+
+// ── GRADIENTS ─────────────────────────────────────────────────────────────────
+/** @type {readonly [string,string][]} */
+const GRADS = Object.freeze([
+  ['#6c63ff','#a78bfa'], ['#f97316','#fbbf24'], ['#ec4899','#f43f5e'],
+  ['#06b6d4','#6366f1'], ['#10b981','#34d399'], ['#8b5cf6','#ec4899'],
+  ['#f59e0b','#ef4444'], ['#14b8a6','#6366f1'], ['#22c55e','#84cc16'],
+  ['#e879f9','#818cf8'], ['#3b82f6','#06b6d4'], ['#fb923c','#f472b6'],
+]);
+
+// ── EMOJIS ────────────────────────────────────────────────────────────────────
+const EMOJIS = Object.freeze([
+  '💫','🔥','⚡','🚀','🌟','💪','🎯','✨','🦁','🏆',
+  '💡','🌈','🧠','🛸','🌅','🪄','👊','🌊','💥','🎪',
+  '🦋','🏄','🧗','🌸','🎸','⚔️','🔑','🎤','🦅','🪐',
+]);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+/** @type {string[]} */ let deck = [];
+let ptr        = 0;
+let shown      = 0;
+let gPtr       = 0;
+let busy       = false;
+let dark       = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+/** @param {string} id @returns {HTMLElement} */
+const el = id => /** @type {HTMLElement} */ (document.getElementById(id));
+
+const eTheme   = el('themeBtn');
+const eBtn     = el('btn');
+const eQuote   = el('quote');
+const eCounter = el('counter');
+const eBar     = el('bar');
+const eEmoji   = el('emoji');
+const eMeta    = /** @type {HTMLMetaElement} */ (document.getElementById('metaTheme'));
+const eIcon    = document.getElementById('appleTouchIcon');
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+/**
+ * Fisher-Yates shuffle (in-place).
+ * @template T @param {T[]} a @returns {T[]}
+ */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** @template T @param {readonly T[]} a @returns {T} */
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/** Draw next quote, refilling deck when exhausted. @returns {string} */
+function draw() {
+  if (ptr >= deck.length) { deck = shuffle([...Q]); ptr = 0; }
+  return deck[ptr++];
+}
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  eTheme.textContent = dark ? '☀️' : '🌙';
+  eTheme.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+  eMeta.content = dark ? '#0c0b18' : '#6c63ff';
+}
+
+function toggleTheme() {
+  dark = !dark;
+  applyTheme();
+  try { localStorage.setItem('mv_theme', dark ? '1' : '0'); } catch (_) { /* noop */ }
+}
+
+// ── SHOW QUOTE ────────────────────────────────────────────────────────────────
+/**
+ * Display the next quote with entrance/exit animations.
+ * @param {boolean} [first] - Skip exit animation on first load.
+ */
+function show(first = false) {
+  if (busy) return;
+  busy = true;
+  eBtn.classList.add('busy');
+
+  const update = () => {
+    const q        = draw();
+    const [c1, c2] = GRADS[gPtr % GRADS.length];
+    gPtr++;
+    shown++;
+
+    eBar.style.background = `linear-gradient(90deg,${c1},${c2})`;
+    eQuote.classList.remove('out');
+    eQuote.textContent = q;
+    eQuote.classList.add('in');
+
+    // Emoji bounce
+    eEmoji.classList.remove('pop');
+    void eEmoji.offsetWidth; // reflow
+    eEmoji.textContent = pick(EMOJIS);
+    eEmoji.classList.add('pop');
+
+    eCounter.textContent = `SPARK #${shown} · ${Q.length} IN THE DECK`;
+    eCounter.classList.add('on');
+
+    setTimeout(() => {
+      eQuote.classList.remove('in');
+      eBtn.classList.remove('busy');
+      busy = false;
+    }, 330);
+  };
+
+  if (first) {
+    update();
+  } else {
+    eQuote.classList.add('out');
+    eCounter.classList.remove('on');
+    setTimeout(update, 235);
+  }
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+eTheme.addEventListener('click', toggleTheme);
+eBtn.addEventListener('click', () => show());
+
+// Swipe-up gesture for next quote
+let ty = 0;
+document.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend',   e => {
+  if (e.changedTouches[0].clientY < ty - 55) show();
+}, { passive: true });
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function init() {
+  // Restore saved theme
+  try {
+    const s = localStorage.getItem('mv_theme');
+    if (s === '1') dark = true;
+    else if (s === '0') dark = false;
+  } catch (_) { /* noop */ }
+  applyTheme();
+
+  // Pre-shuffle deck
+  deck = shuffle([...Q]);
+
+  // First quote auto-appears
+  setTimeout(() => show(true), 180);
+
+  // ── PWA: App Icon ───────────────────────────────────────────────────────────
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#6c63ff"/><text x="256" y="370" font-size="295" text-anchor="middle" font-family="system-ui,sans-serif">⚡</text></svg>`;
+  const iconUri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  if (eIcon) eIcon.setAttribute('href', iconUri);
+
+  // ── PWA: Web App Manifest (injected as Blob URL) ────────────────────────────
+  try {
+    const manifest = JSON.stringify({
+      name: 'Daily Motivator',
+      short_name: 'Motivator',
+      description: 'A pocket-sized shot of motivation.',
+      start_url: './',
+      display: 'standalone',
+      background_color: '#0c0b18',
+      theme_color: '#6c63ff',
+      orientation: 'portrait-primary',
+      icons: [
+        { src: iconUri, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+        { src: iconUri, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+      ],
+    });
+    const link = Object.assign(document.createElement('link'), {
+      rel: 'manifest',
+      href: URL.createObjectURL(new Blob([manifest], { type: 'application/manifest+json' })),
+    });
+    document.head.appendChild(link);
+  } catch (e) { console.warn('[PWA] manifest:', e); }
+
+  // ── PWA: Service Worker (blob-scoped, enables install prompt + caching) ─────
+  if ('serviceWorker' in navigator) {
+    const code = `
+const CV='mv-v1';
+self.addEventListener('install',e=>{e.waitUntil(self.skipWaiting());});
+self.addEventListener('activate',e=>{
+  e.waitUntil(
+    caches.keys()
+      .then(ks=>Promise.all(ks.filter(k=>k!==CV).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+  );
+});
+self.addEventListener('fetch',e=>{
+  e.respondWith(
+    caches.match(e.request)
+      .then(r=>r||fetch(e.request)
+        .then(res=>{
+          const clone=res.clone();
+          caches.open(CV).then(c=>c.put(e.request,clone));
+          return res;
+        })
+        .catch(()=>new Response('Offline',{status:503,headers:{'Content-Type':'text/plain'}}))
+      )
+  );
+});`;
+    navigator.serviceWorker
+      .register(URL.createObjectURL(new Blob([code], { type: 'application/javascript' })))
+      .then(r => console.log('[SW] scope:', r.scope))
+      .catch(e => console.warn('[SW]', e));
+  }
+})();
+</script>
+</body>
+</html>
