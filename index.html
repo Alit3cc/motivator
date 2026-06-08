@@ -234,7 +234,7 @@
 
   <footer>
     <button id="btn">✨ &nbsp;Inspire Me</button>
-    <p class="hint">Tap for a new spark · swipe up too</p>
+    <p class="hint">Tap for a new spark · swipe up for next · swipe down for back</p>
   </footer>
 
 </div>
@@ -450,6 +450,9 @@ let shown      = 0;
 let gPtr       = 0;
 let busy       = false;
 let dark       = window.matchMedia('(prefers-color-scheme: dark)').matches;
+let current    = '';
+/** @type {string[]} */ let history = [];
+let historyPtr = -1;
 
 // ── DOM ───────────────────────────────────────────────────────────────────────
 /** @param {string} id @returns {HTMLElement} */
@@ -505,16 +508,33 @@ function toggleTheme() {
  * Display the next quote with entrance/exit animations.
  * @param {boolean} [first] - Skip exit animation on first load.
  */
-function show(first = false) {
+function show(first = false, backward = false) {
   if (busy) return;
+  if (backward && historyPtr <= 0) return;
+
   busy = true;
   eBtn.classList.add('busy');
 
   const update = () => {
-    const q        = draw();
+    let q;
+    if (backward) {
+      historyPtr -= 1;
+      q = history[historyPtr];
+    } else {
+      if (historyPtr < history.length - 1) {
+        historyPtr += 1;
+        q = history[historyPtr];
+      } else {
+        q = draw();
+        history.push(q);
+        historyPtr = history.length - 1;
+      }
+    }
+
+    current = q;
+    shown = history.length;
     const [c1, c2] = GRADS[gPtr % GRADS.length];
     gPtr++;
-    shown++;
 
     eBar.style.background = `linear-gradient(90deg,${c1},${c2})`;
     eQuote.classList.remove('out');
@@ -527,7 +547,7 @@ function show(first = false) {
     eEmoji.textContent = pick(EMOJIS);
     eEmoji.classList.add('pop');
 
-    eCounter.textContent = `SPARK #${shown} · ${Q.length} IN THE DECK`;
+    eCounter.textContent = `SPARK #${historyPtr + 1} · ${Q.length} IN THE DECK`;
     eCounter.classList.add('on');
 
     setTimeout(() => {
@@ -550,11 +570,13 @@ function show(first = false) {
 eTheme.addEventListener('click', toggleTheme);
 eBtn.addEventListener('click', () => show());
 
-// Swipe-up gesture for next quote
+// Swipe gesture for next and previous quote
 let ty = 0;
 document.addEventListener('touchstart', e => { ty = e.touches[0].clientY; }, { passive: true });
 document.addEventListener('touchend',   e => {
-  if (e.changedTouches[0].clientY < ty - 55) show();
+  const cy = e.changedTouches[0].clientY;
+  if (cy < ty - 55) show();
+  else if (cy > ty + 55) show(false, true);
 }, { passive: true });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
