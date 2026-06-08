@@ -11,6 +11,15 @@
   <meta name="apple-mobile-web-app-title" content="Motivator" />
   <meta name="theme-color" content="#6c63ff" id="metaTheme" />
   <link id="appleTouchIcon" rel="apple-touch-icon" />
+  
+  <!-- Favicon linking-->
+  <link rel="icon" type="image/png" href="/motivator/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/motivator/favicon.svg" />
+  <link rel="shortcut icon" href="/motivator/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/motivator/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="Motivator" />
+  <link rel="manifest" href="/motivator/site.webmanifest" />
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -202,6 +211,22 @@
       letter-spacing: .01em;
     }
 
+    .credit {
+      font-size: .66rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.4;
+      max-width: 100%;
+    }
+    .credit a {
+      color: inherit;
+      text-decoration: underline;
+      opacity: .85;
+    }
+    .credit a:hover {
+      opacity: 1;
+    }
+
     /* ── LANDSCAPE COMPACT ──────────────────────── */
     @media (orientation: landscape) and (max-height: 480px) {
       .body    { padding: 16px 22px 16px; }
@@ -235,6 +260,7 @@
   <footer>
     <button id="btn">✨ &nbsp;Inspire Me</button>
     <p class="hint">Tap for a new spark · swipe up for next · swipe down for back</p>
+    <p class="credit">Favicon by <a href="https://pixabay.com/users/diadeluca70-9673681/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4281077" target="_blank" rel="noopener noreferrer">Dia DeLuca</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=4281077" target="_blank" rel="noopener noreferrer">Pixabay</a></p>
   </footer>
 
 </div>
